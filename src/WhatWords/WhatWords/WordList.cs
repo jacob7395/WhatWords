@@ -5,12 +5,14 @@ namespace what_word;
 
 public class WordList
 {
-    private ImmutableArray<Word> _words;
+    private readonly ImmutableArray<Word> _words;
 
     private WordList(ImmutableArray<Word> words)
     {
         _words = words;
     }
+
+    public IEnumerable<Word> Words => _words.AsEnumerable();
 
     public static async Task<ErrorOr<WordList>> Load(string path)
     {
@@ -61,8 +63,10 @@ public class WordList
         }
     }
 
-    public ImmutableArray<string> MatchWords(ImmutableArray<char> characterArray, int settingsMinCharacters,
-                                             int? settingsMaxCharacters)
+    public ImmutableArray<Word> WordsContaining(char character) => [.._words.Where(w => w.Value.Contains(character))];
+
+    public WordList MatchWords(ImmutableArray<char> characterArray, int settingsMinCharacters,
+                               int? settingsMaxCharacters)
     {
         var matchBag = new ConcurrentBag<Word>();
 
@@ -80,6 +84,6 @@ public class WordList
                 matchBag.Add(word);
             });
 
-        return [..matchBag.Select(w => w.Value)];
+        return new([..matchBag]);
     }
 }
